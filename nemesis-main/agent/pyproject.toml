@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "nemesis-agent"
+version = "0.1.0"
+description = "Nemesis Build Agent"
+authors = ["mkkoerner42-cpu <mkkoerner42@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.111.0"
+uvicorn = "^0.30.0"
+apscheduler = "^3.10.4"
+pydantic = "^2.7.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"

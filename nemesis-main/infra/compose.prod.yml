@@ -1,0 +1,19 @@
+services:
+  agent:
+    image: ${REGISTRY}/agent:${IMAGE_TAG}
+    env_file: /opt/nemesis/.env
+    ports: ["8080:8000"]
+    restart: unless-stopped
+  redis:
+    image: redis:7
+    restart: unless-stopped
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: pass
+      POSTGRES_USER: nemesis
+      POSTGRES_DB: nemesis
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+volumes:
+  dbdata:

@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Nemesis · Workers</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="brand"><div class="logo"></div><div><h1>Nemesis</h1><small>Workers</small></div></div>
+  <nav class="nav">
+    <a href="/">Dashboard</a>
+    <a href="/modules">Module</a>
+    <a class="active" href="/workers">Workers</a>
+    <a href="/docs" target="_blank">API</a>
+  </nav>
+</header>
+<main class="container">
+  <section class="card">
+    <div class="card-title">Quick Stats</div>
+    <div class="stats">
+      <div class="stat"><span class="stat-num">{{metrics.running_scans}}</span><span class="stat-label">laufende Scans</span></div>
+      <div class="stat"><span class="stat-num">{{metrics.running_workers}}</span><span class="stat-label">laufende Worker</span></div>
+      <div class="stat stat-wide">
+        <div class="stat-label">Forschungsfortschritt</div>
+        <div class="progress"><div class="bar" style="width: {{metrics.progress.percent}}%"></div></div>
+        <small>{{metrics.progress.scanned}} / {{metrics.progress.total}} Targets ({{metrics.progress.percent}}%)</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-title">Worker PC einchecken</div>
+    <form class="row" method="post" action="/workers/register">
+      <input class="input" type="text" name="name" placeholder="Hostname oder Alias" required>
+      <button class="btn">Registrieren</button>
+    </form>
+    {% if request.query_params.get('created') and request.query_params.get('token') %}
+      <p><strong>Neu registriert:</strong> {{ request.query_params.get('created') }} · Token: <span class="mono">{{ request.query_params.get('token') }}</span></p>
+    {% endif %}
+    <p>Nach Registrierung erscheint ein Token in der URL. Beispiel-Check-in (alle 60s):</p>
+    <pre class="code">
+Windows (PowerShell):
+powershell -Command "while($true){ try { Invoke-RestMethod -Method Post -Uri '{{host}}/workers/heartbeat' -Body @{ name='DEIN_NAME'; token='DEIN_TOKEN' } } catch {} ; Start-Sleep -Seconds 60 }"
+
+Linux/macOS (curl):
+while true; do curl -s -X POST '{{host}}/workers/heartbeat' -H 'Content-Type: application/json' -d '{"name":"DEIN_NAME","token":"DEIN_TOKEN"}' >/dev/null; sleep 60; done
+    </pre>
+  </section>
+
+  <section class="card">
+    <div class="card-title">Worker Liste</div>
+    <table class="table">
+      <tr><th>ID</th><th>Name</th><th>Status</th><th>Last heartbeat</th><th>Created</th></tr>
+      {% for w in workers %}
+      <tr>
+        <td>{{w[0]}}</td><td>{{w[1]}}</td>
+        <td><span class="badge {{ 'on' if w[2]=='online' else 'off' }}">{{w[2]}}</span></td>
+        <td>{{w[3] or ''}}</td><td>{{w[4]}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+</main>
+</body>
+</html>

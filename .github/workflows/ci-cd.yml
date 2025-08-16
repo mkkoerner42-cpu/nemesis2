@@ -32,7 +32,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: nemesis-main/agent
           file: nemesis-main/agent/dockerfile
           push: true
           tags: |

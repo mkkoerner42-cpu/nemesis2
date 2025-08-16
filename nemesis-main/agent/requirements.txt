@@ -7,3 +7,4 @@ python-dotenv
 sqlite-utils
 apscheduler
 jinja2
+python-multipart

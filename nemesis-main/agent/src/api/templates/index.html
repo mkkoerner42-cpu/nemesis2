@@ -1,1 +1,123 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Nemesis Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="brand">
+    <div class="logo"></div>
+    <div>
+      <h1>Nemesis</h1>
+      <small>Mode: {{ cfg.mode }} · OpenAI: {{ 'ON' if cfg.openai_api_key_set else 'OFF' }}</small>
+    </div>
+  </div>
+  <nav class="nav">
+    <a class="active" href="/">Dashboard</a>
+    <a href="/modules">Module</a>
+    <a href="/workers">Workers</a>
+    <a href="/docs" target="_blank">API</a>
+  </nav>
+</header>
+
+<main class="container">
+  <section class="card">
+    <div class="card-title">Quick Stats</div>
+    <div class="stats">
+      <div class="stat"><span class="stat-num">{{metrics.running_scans}}</span><span class="stat-label">laufende Scans</span></div>
+      <div class="stat"><span class="stat-num">{{metrics.running_workers}}</span><span class="stat-label">laufende Worker</span></div>
+      <div class="stat stat-wide">
+        <div class="stat-label">Forschungsfortschritt</div>
+        <div class="progress"><div class="bar" style="width: {{metrics.progress.percent}}%"></div></div>
+        <small>{{metrics.progress.scanned}} / {{metrics.progress.total}} Targets ({{metrics.progress.percent}}%)</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid grid-2">
+    <div class="card">
+      <div class="card-title">Recent Findings</div>
+      <table class="table">
+        <tr><th>ID</th><th>Title</th><th>Severity</th><th>At</th></tr>
+        {% for f in findings %}
+        <tr><td>{{f[0]}}</td><td>{{f[1]}}</td><td><span class="sev {{f[2]}}">{{f[2]}}</span></td><td>{{f[4]}}</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Rules</div>
+      <div class="subhead">Shadow</div>
+      <table class="table tight">
+        <tr><th>ID</th><th>Pattern</th><th>At</th></tr>
+        {% for r in shadow %}
+        <tr><td>{{r[0]}}</td><td class="mono">{{r[1]}}</td><td>{{r[2]}}</td></tr>
+        {% endfor %}
+      </table>
+      <div class="subhead">Live</div>
+      <table class="table tight">
+        <tr><th>ID</th><th>Pattern</th><th>At</th></tr>
+        {% for r in live %}
+        <tr><td>{{r[0]}}</td><td class="mono">{{r[1]}}</td><td>{{r[2]}}</td></tr>
+        {% endfor %}
+      </table>
+      <form class="row" method="post" action="/rules/shadow/form">
+        <input class="input" type="text" name="pattern" placeholder="Neue Shadow-Regel (pattern)" required>
+        <button class="btn">Hinzufügen</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-title">Jobs (Last 50)</div>
+    <table class="table">
+      <tr><th>ID</th><th>Job</th><th>Level</th><th>Msg</th><th>At</th></tr>
+      {% for j in jobs %}
+      <tr><td>{{j[0]}}</td><td>{{j[1]}}</td><td>{{j[2]}}</td><td>{{j[3]}}</td><td>{{j[4]}}</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <section class="card">
+    <div class="card-title">Bounty Platforms</div>
+    <form class="grid grid-3 row-gap" method="post" action="/settings/platforms/add">
+      <div><label>Name</label><input class="input" type="text" name="name" placeholder="HackerOne" required></div>
+      <div><label>Base URL</label><input class="input" type="text" name="base_url" placeholder="https://api.hackerone.com/"></div>
+      <div><label>API Key</label><input class="input" type="text" name="api_key" placeholder="***"></div>
+      <div class="col-span-3"><button class="btn">Plattform speichern/aktivieren</button></div>
+    </form>
+    <table class="table">
+      <tr><th>ID</th><th>Name</th><th>Base URL</th><th>Enabled</th><th>Aktion</th></tr>
+      {% for p in platforms %}
+      <tr>
+        <td>{{p[0]}}</td><td>{{p[1]}}</td><td class="mono">{{p[2] or ''}}</td>
+        <td><span class="badge {{ 'on' if p[3]==1 else 'off' }}">{{ 'on' if p[3]==1 else 'off' }}</span></td>
+        <td>
+          {% if p[3]==1 %}
+          <form method="post" action="/settings/platforms/toggle" style="display:inline">
+            <input type="hidden" name="pid" value="{{p[0]}}">
+            <input type="hidden" name="enable" value="0">
+            <button class="btn btn-ghost">deaktivieren</button>
+          </form>
+          {% else %}
+          <form method="post" action="/settings/platforms/toggle" style="display:inline">
+            <input type="hidden" name="pid" value="{{p[0]}}">
+            <input type="hidden" name="enable" value="1">
+            <button class="btn btn-ghost">aktivieren</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+</main>
+
+<footer class="footer">
+  <small>Nemesis © 2025 · Local-only safe scan (headers/status) · For authorized targets only.</small>
+</footer>
+</body>
+</html>
 

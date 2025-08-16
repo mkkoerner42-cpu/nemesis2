@@ -16,26 +16,29 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set image name (bestehendes Package!)
-        run: echo "IMAGE=ghcr.io/${{ github.repository_owner }}/nemesis-agent" >> $GITHUB_ENV
+      # Neuer, frischer Package-Name (vermeidet alte ACL-Probleme)
+      - name: Set image name
+        run: echo "IMAGE=ghcr.io/${{ github.repository_owner }}/nemesis2-agent" >> $GITHUB_ENV
 
-      - name: Log in to GHCR
+      # Login bei GHCR mit deinem PAT (Repo-Secret: GHCR_PAT)
+      - name: Log in to GHCR (PAT)
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PAT }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # Wichtig: Kontext auf den Agent-Ordner setzen
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: nemesis-main/agent
           file: nemesis-main/agent/dockerfile
           push: true
-          # WICHTIG: Label ordnet das Image deinem Repo zu → GHCR lässt Push mit GITHUB_TOKEN zu
+          # Dieses Label verknüpft das Package sauber mit deinem Repo
           labels: |
             org.opencontainers.image.source=${{ github.repository }}
           tags: |
